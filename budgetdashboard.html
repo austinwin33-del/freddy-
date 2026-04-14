@@ -1,0 +1,900 @@
+<html>
+    <head>
+        <title>Nguyens Budget Dashboard</title>
+        <style>
+            body {
+                max-width: 760px;
+                margin: 0 auto;
+                padding: 3rem 1.5rem;
+                font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+                line-height: 1.7;
+                background: radial-gradient(circle at top, #24344f 0%, #111827 45%, #090d16 100%);
+                color: #f3f6fb;
+            }
+
+            h1 {
+                margin-bottom: 0.25rem;
+                font-size: 3rem;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #ffffff;
+                text-shadow: 0 8px 30px rgba(92, 144, 255, 0.25);
+            }
+
+            h3 {
+                margin-top: 0;
+                margin-bottom: 1.5rem;
+                font-weight: normal;
+                color: #a9b9d6;
+            }
+
+            p {
+                margin-bottom: 1.25rem;
+            }
+
+            ol {
+                width: min(100%, 420px);
+                margin: 2rem auto 1.5rem;
+                padding-left: 1.5rem;
+            }
+
+            li {
+                margin-bottom: 0.75rem;
+                padding: 0.7rem 0.9rem;
+                border-radius: 14px;
+                background: rgba(255, 255, 255, 0.06);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+            }
+
+            li:hover {
+                background: rgba(142, 197, 255, 0.2);
+                color: #ffffff;
+                transform: translateY(-2px);
+                box-shadow: 0 10px 24px rgba(142, 197, 255, 0.18);
+            }
+
+            .budget-list {
+                list-style: none;
+                padding-left: 0;
+            }
+
+            .budget-list li {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+            }
+
+            .budget-list label {
+                font-weight: 600;
+                color: #dce8f8;
+            }
+
+            .budget-name {
+                flex: 1;
+            }
+
+            .budget-label-wrap {
+                display: flex;
+                align-items: center;
+                gap: 0.65rem;
+                flex: 1;
+                min-width: 0;
+            }
+
+            .drag-handle {
+                display: none;
+                color: #8ec5ff;
+                font-size: 1rem;
+                line-height: 1;
+                cursor: grab;
+                user-select: none;
+            }
+
+            .budget-list.is-custom-sorting .drag-handle {
+                display: inline-block;
+            }
+
+            .budget-list.is-custom-sorting li {
+                border-color: rgba(142, 197, 255, 0.32);
+                background: rgba(142, 197, 255, 0.08);
+                box-shadow: inset 0 0 0 1px rgba(142, 197, 255, 0.12);
+            }
+
+            .budget-list.is-custom-sorting li:hover {
+                transform: none;
+            }
+
+            .budget-list.is-custom-sorting li[draggable="true"] {
+                cursor: grab;
+            }
+
+            .budget-list.is-custom-sorting li.dragging {
+                opacity: 0.55;
+            }
+
+            .budget-list.is-custom-sorting li.drop-target {
+                border-color: rgba(197, 226, 255, 0.65);
+                background: rgba(197, 226, 255, 0.12);
+            }
+
+            .budget-input-group {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                position: relative;
+            }
+
+            .budget-list input {
+                width: 140px;
+                padding: 0.65rem 0.8rem;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.18);
+                background: rgba(12, 20, 35, 0.75);
+                color: #f3f6fb;
+                font: inherit;
+            }
+
+            .budget-list input::placeholder {
+                color: #9ab0cb;
+            }
+
+            .budget-list input:focus {
+                outline: 2px solid rgba(142, 197, 255, 0.55);
+                outline-offset: 2px;
+            }
+
+            .remove-budget-button,
+            .add-budget-button {
+                padding: 0.65rem 0.95rem;
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.08);
+                color: #f3f6fb;
+                font: inherit;
+                cursor: pointer;
+                transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+            }
+
+            .remove-budget-button:hover,
+            .add-budget-button:hover {
+                background: rgba(142, 197, 255, 0.18);
+                border-color: rgba(142, 197, 255, 0.4);
+                transform: translateY(-1px);
+            }
+
+            .remove-budget-button {
+                min-width: 2.4rem;
+                padding: 0.45rem 0.55rem;
+                border-color: rgba(255, 255, 255, 0.08);
+                background: rgba(255, 255, 255, 0.03);
+                color: #a9b9d6;
+                font-size: 0.88rem;
+                letter-spacing: 0.12em;
+            }
+
+            .remove-budget-button:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.14);
+                color: #dce8f8;
+            }
+
+            .budget-menu {
+                position: absolute;
+                top: calc(100% + 0.45rem);
+                right: 0;
+                min-width: 110px;
+                padding: 0.35rem;
+                border-radius: 12px;
+                background: rgba(10, 16, 28, 0.96);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+                z-index: 10;
+            }
+
+            .budget-menu[hidden] {
+                display: none;
+            }
+
+            .budget-menu-item {
+                width: 100%;
+                padding: 0.65rem 0.8rem;
+                border: 0;
+                border-radius: 9px;
+                background: transparent;
+                color: #f3f6fb;
+                font: inherit;
+                text-align: left;
+                cursor: pointer;
+            }
+
+            .budget-menu-item:hover {
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+            .budget-card {
+                width: min(100%, 420px);
+                margin: 1rem auto 2rem;
+                padding: 1rem;
+                border-radius: 18px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+            }
+
+            .budget-card h4 {
+                margin: 0;
+                color: #ffffff;
+                font-size: 1rem;
+            }
+
+            .budget-card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+                margin-bottom: 0.85rem;
+            }
+
+            .budget-sort-menu-wrap {
+                position: relative;
+            }
+
+            .budget-sort-button {
+                min-width: 2.4rem;
+                padding: 0.45rem 0.55rem;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.03);
+                color: #a9b9d6;
+                font-size: 0.88rem;
+                letter-spacing: 0.12em;
+                cursor: pointer;
+            }
+
+            .budget-sort-button:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.14);
+                color: #dce8f8;
+            }
+
+            .budget-sort-menu {
+                position: absolute;
+                top: calc(100% + 0.45rem);
+                right: 0;
+                min-width: 220px;
+                padding: 0.75rem;
+                border-radius: 12px;
+                background: rgba(10, 16, 28, 0.96);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+                z-index: 10;
+            }
+
+            .budget-sort-menu[hidden] {
+                display: none;
+            }
+
+            .budget-sort-controls {
+                display: flex;
+                gap: 0.75rem;
+                align-items: center;
+            }
+
+            .budget-sort-controls select {
+                flex: 1;
+                padding: 0.75rem 0.9rem;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.18);
+                background: rgba(12, 20, 35, 0.75);
+                color: #f3f6fb;
+                font: inherit;
+            }
+
+            .budget-sort-controls select:focus {
+                outline: 2px solid rgba(142, 197, 255, 0.55);
+                outline-offset: 2px;
+            }
+
+            .budget-sort-note {
+                margin: 0.75rem 0 0;
+                color: #a9b9d6;
+                font-size: 0.92rem;
+            }
+
+            .add-budget-controls {
+                display: flex;
+                gap: 0.75rem;
+                align-items: center;
+            }
+
+            .add-budget-controls input {
+                flex: 1;
+                padding: 0.75rem 0.9rem;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.18);
+                background: rgba(12, 20, 35, 0.75);
+                color: #f3f6fb;
+                font: inherit;
+            }
+
+            .add-budget-controls input::placeholder {
+                color: #9ab0cb;
+            }
+
+            .add-budget-controls input:focus {
+                outline: 2px solid rgba(142, 197, 255, 0.55);
+                outline-offset: 2px;
+            }
+
+            a {
+                color: #8ec5ff;
+                font-weight: bold;
+                text-decoration-thickness: 2px;
+                text-underline-offset: 0.18em;
+            }
+
+            a:hover {
+                color: #c5e2ff;
+            }
+
+            .page-button-wrap {
+                display: flex;
+                justify-content: center;
+                gap: 0.85rem;
+                margin: 2rem 0 1rem;
+            }
+
+            .page-button {
+                display: inline-block;
+                padding: 0.85rem 1.4rem;
+                border-radius: 999px;
+                border: 1px solid rgba(142, 197, 255, 0.35);
+                background: linear-gradient(135deg, rgba(142, 197, 255, 0.18), rgba(89, 145, 255, 0.3));
+                box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+                text-decoration: none;
+            }
+
+            .page-button:hover {
+                color: #ffffff;
+                border-color: rgba(197, 226, 255, 0.6);
+                box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
+            }
+
+            .dashboard-cards {
+                display: grid;
+                grid-template-columns: minmax(0, 420px);
+                justify-content: center;
+                margin: 2rem 0 1.5rem;
+            }
+
+            .net-worth-card {
+                width: 100%;
+                margin: 0;
+                padding: 1.2rem;
+                box-sizing: border-box;
+                border-radius: 22px;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+            }
+
+            .net-worth-title {
+                margin: 0 0 0.75rem;
+                color: #ffffff;
+                font-size: 1.05rem;
+            }
+
+            .net-worth-row {
+                display: grid;
+                grid-template-columns: minmax(150px, 180px) minmax(220px, 1fr);
+                align-items: center;
+                background: rgba(255, 255, 255, 0.03);
+                border-radius: 18px;
+                overflow: hidden;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            .net-worth-label {
+                margin: 0;
+                color: #a9b9d6;
+                font-size: 1rem;
+                font-weight: 600;
+                padding: 0.95rem 1rem;
+                border-right: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            .net-worth-amount {
+                margin: 0;
+                padding: 0.95rem 1rem;
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #ffffff;
+            }
+
+            @media (max-width: 560px) {
+                .dashboard-cards {
+                    grid-template-columns: 1fr;
+                }
+
+                .net-worth-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .net-worth-label {
+                    border-right: 0;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                }
+            }
+        </style>
+        <script>
+            var dashboardStorageKey = "budget-dashboard-state";
+            var incomeCalculatorStorageKey = "income-calculator-state";
+            var incomeCalculatorNetTotalKey = "income-calculator-grand-net";
+            var startingNetWorth = 0;
+
+            function sanitizeCurrencyInput(value) {
+                var cleaned = value.replace(/[^0-9.]/g, "");
+                var parts = cleaned.split(".");
+
+                if (parts.length === 1) {
+                    return parts[0];
+                }
+
+                return parts[0] + "." + parts.slice(1).join("");
+            }
+
+            function formatCurrencyValue(value) {
+                var cleaned = sanitizeCurrencyInput(value);
+                var amount = Number.parseFloat(cleaned);
+
+                if (Number.isNaN(amount)) {
+                    return "";
+                }
+
+                return amount.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD"
+                });
+            }
+
+            function parseCurrencyValue(value) {
+                var cleaned = sanitizeCurrencyInput(value);
+                var amount = Number.parseFloat(cleaned);
+
+                if (Number.isNaN(amount)) {
+                    return 0;
+                }
+
+                return amount;
+            }
+
+            function formatMoney(amount) {
+                return amount.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD"
+                });
+            }
+
+            function calculateSavedNetIncome() {
+                var savedState = localStorage.getItem(incomeCalculatorStorageKey);
+
+                if (!savedState) {
+                    return 0;
+                }
+
+                try {
+                    return JSON.parse(savedState).reduce(function (jobTotal, job) {
+                        var hours = Number.parseFloat(job.hours) || 0;
+                        var payRate = parseCurrencyValue(job.payRate || "");
+                        var grossPay = hours * payRate;
+                        var deductionTotal = (job.deductions || []).reduce(function (lineTotal, deduction) {
+                            if (deduction.type === "currency") {
+                                return lineTotal + parseCurrencyValue(deduction.value || "");
+                            }
+
+                            if (deduction.type === "percentage") {
+                                var percent = Number.parseFloat(String(deduction.value || "").replace(/[^0-9.]/g, ""));
+                                return lineTotal + (Number.isNaN(percent) ? 0 : grossPay * (percent / 100));
+                            }
+
+                            var integerValue = Number.parseInt(String(deduction.value || "").replace(/\D/g, ""), 10);
+                            return lineTotal + (Number.isNaN(integerValue) ? 0 : integerValue);
+                        }, 0);
+
+                        return jobTotal + (grossPay - deductionTotal);
+                    }, 0);
+                } catch (error) {
+                    return 0;
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                var netWorthAmount = document.getElementById("net-worth-amount");
+                var budgetList = document.getElementById("budget-list");
+                var addBudgetForm = document.getElementById("add-budget-form");
+                var newBudgetNameInput = document.getElementById("new-budget-name");
+                var budgetSortSelect = document.getElementById("budget-sort-select");
+                var budgetSortNote = document.getElementById("budget-sort-note");
+                var budgetSortButton = document.getElementById("budget-sort-button");
+                var budgetSortMenu = document.getElementById("budget-sort-menu");
+                var customBudgetCounter = 0;
+                var draggedBudgetItem = null;
+
+                function saveDashboardState() {
+                    var budgets = [];
+
+                    budgetList.querySelectorAll("li").forEach(function (item) {
+                        var label = item.querySelector(".budget-name");
+                        var input = item.querySelector(".currency-input");
+
+                        if (label && input) {
+                            budgets.push({
+                                label: label.textContent,
+                                value: input.value
+                            });
+                        }
+                    });
+
+                    localStorage.setItem(dashboardStorageKey, JSON.stringify({
+                        budgets: budgets,
+                        sortMode: budgetSortSelect.value
+                    }));
+                }
+
+                function loadDashboardState() {
+                    var savedState = localStorage.getItem(dashboardStorageKey);
+
+                    if (!savedState) {
+                        return;
+                    }
+
+                    try {
+                        var parsedState = JSON.parse(savedState);
+
+                        budgetSortSelect.value = parsedState.sortMode || "custom";
+
+                        (parsedState.budgets || []).forEach(function (budget) {
+                            budgetList.appendChild(createBudgetItem(budget.label, true, budget.value || ""));
+                        });
+                    } catch (error) {
+                        localStorage.removeItem(dashboardStorageKey);
+                    }
+                }
+
+                function syncStartingEarnings() {
+                    var savedNetIncome = localStorage.getItem(incomeCalculatorNetTotalKey);
+
+                    if (savedNetIncome !== null && savedNetIncome !== "") {
+                        startingNetWorth = Number(savedNetIncome) || 0;
+                        return;
+                    }
+
+                    startingNetWorth = calculateSavedNetIncome();
+                }
+
+                function getCurrencyInputs() {
+                    return budgetList.querySelectorAll(".currency-input");
+                }
+
+                function getBudgetAmount(item) {
+                    var input = item.querySelector(".currency-input");
+                    return parseCurrencyValue(input ? input.value : "");
+                }
+
+                function updateSortModeUi() {
+                    var isCustom = budgetSortSelect.value === "custom";
+
+                    budgetList.classList.toggle("is-custom-sorting", isCustom);
+                    budgetSortNote.textContent = isCustom
+                        ? "Custom sort is on. Drag budget rows into the order you want."
+                        : "Sorting is automatic based on the amounts in each budget row.";
+
+                    budgetList.querySelectorAll("li").forEach(function (item) {
+                        item.draggable = isCustom;
+                    });
+                }
+
+                function sortBudgetList() {
+                    var items = Array.from(budgetList.querySelectorAll("li"));
+                    var mode = budgetSortSelect.value;
+
+                    if (mode === "high-to-low") {
+                        items.sort(function (a, b) {
+                            return getBudgetAmount(b) - getBudgetAmount(a);
+                        });
+                    } else if (mode === "low-to-high") {
+                        items.sort(function (a, b) {
+                            return getBudgetAmount(a) - getBudgetAmount(b);
+                        });
+                    } else {
+                        updateSortModeUi();
+                        saveDashboardState();
+                        return;
+                    }
+
+                    items.forEach(function (item) {
+                        budgetList.appendChild(item);
+                    });
+
+                    updateSortModeUi();
+                    saveDashboardState();
+                }
+
+                function clearDropTargets() {
+                    budgetList.querySelectorAll(".drop-target").forEach(function (item) {
+                        item.classList.remove("drop-target");
+                    });
+                }
+
+                function updateNetWorth() {
+                    var totalBudget = 0;
+                    var currencyInputs = getCurrencyInputs();
+
+                    currencyInputs.forEach(function (input) {
+                        totalBudget += parseCurrencyValue(input.value);
+                    });
+
+                    netWorthAmount.textContent = formatMoney(startingNetWorth - totalBudget);
+                }
+
+                function attachCurrencyBehavior(input) {
+                    input.addEventListener("input", function () {
+                        updateNetWorth();
+                        if (budgetSortSelect.value !== "custom" && budgetList.contains(input.closest("li"))) {
+                            sortBudgetList();
+                        }
+                        saveDashboardState();
+                    });
+
+                    input.addEventListener("focus", function () {
+                        var currentValue = parseCurrencyValue(input.value);
+
+                        if (currentValue) {
+                            input.value = currentValue.toFixed(2).replace(/\.00$/, "");
+                        }
+                    });
+
+                    input.addEventListener("blur", function () {
+                        input.value = formatCurrencyValue(input.value);
+                        updateNetWorth();
+                        if (budgetSortSelect.value !== "custom" && budgetList.contains(input.closest("li"))) {
+                            sortBudgetList();
+                        }
+                        saveDashboardState();
+                    });
+                }
+
+                function createBudgetItem(labelText, isCustom, initialValue) {
+                    customBudgetCounter += 1;
+
+                    var listItem = document.createElement("li");
+                    var labelWrap = document.createElement("div");
+                    var dragHandle = document.createElement("span");
+                    var label = document.createElement("label");
+                    var inputGroup = document.createElement("div");
+                    var input = document.createElement("input");
+
+                    listItem.className = isCustom ? "custom-budget-item" : "";
+                    labelWrap.className = "budget-label-wrap";
+                    dragHandle.className = "drag-handle";
+                    dragHandle.textContent = "::";
+                    label.className = "budget-name";
+                    label.textContent = labelText;
+                    label.setAttribute("for", "custom-budget-" + customBudgetCounter);
+
+                    inputGroup.className = "budget-input-group";
+
+                    input.type = "text";
+                    input.inputMode = "decimal";
+                    input.className = "currency-input";
+                    input.id = "custom-budget-" + customBudgetCounter;
+                    input.name = "custom-budget-" + customBudgetCounter;
+                    input.placeholder = "$0.00";
+                    input.value = initialValue || "";
+
+                    labelWrap.appendChild(dragHandle);
+                    labelWrap.appendChild(label);
+                    inputGroup.appendChild(input);
+
+                    if (isCustom) {
+                        var removeButton = document.createElement("button");
+                        var menu = document.createElement("div");
+                        var menuItem = document.createElement("button");
+
+                        removeButton.type = "button";
+                        removeButton.className = "remove-budget-button";
+                        removeButton.textContent = "...";
+                        removeButton.setAttribute("aria-label", "Remove budget type");
+                        removeButton.title = "More options";
+
+                        menu.className = "budget-menu";
+                        menu.hidden = true;
+
+                        menuItem.type = "button";
+                        menuItem.className = "budget-menu-item";
+                        menuItem.textContent = "Remove";
+
+                        removeButton.addEventListener("click", function (event) {
+                            event.stopPropagation();
+                            menu.hidden = !menu.hidden;
+                        });
+
+                        menuItem.addEventListener("click", function () {
+                            listItem.remove();
+                            updateNetWorth();
+                            saveDashboardState();
+                        });
+
+                        document.addEventListener("click", function (event) {
+                            if (!inputGroup.contains(event.target)) {
+                                menu.hidden = true;
+                            }
+                        });
+
+                        menu.appendChild(menuItem);
+                        inputGroup.appendChild(removeButton);
+                        inputGroup.appendChild(menu);
+                    }
+
+                    listItem.addEventListener("dragstart", function () {
+                        if (budgetSortSelect.value !== "custom") {
+                            return;
+                        }
+
+                        draggedBudgetItem = listItem;
+                        listItem.classList.add("dragging");
+                    });
+
+                    listItem.addEventListener("dragend", function () {
+                        draggedBudgetItem = null;
+                        listItem.classList.remove("dragging");
+                        clearDropTargets();
+                        saveDashboardState();
+                    });
+
+                    listItem.addEventListener("dragover", function (event) {
+                        if (budgetSortSelect.value !== "custom" || !draggedBudgetItem || draggedBudgetItem === listItem) {
+                            return;
+                        }
+
+                        event.preventDefault();
+                        clearDropTargets();
+                        listItem.classList.add("drop-target");
+                    });
+
+                    listItem.addEventListener("drop", function (event) {
+                        if (budgetSortSelect.value !== "custom" || !draggedBudgetItem || draggedBudgetItem === listItem) {
+                            return;
+                        }
+
+                        event.preventDefault();
+                        clearDropTargets();
+
+                        var targetRect = listItem.getBoundingClientRect();
+                        var shouldInsertAfter = event.clientY > targetRect.top + targetRect.height / 2;
+
+                        if (shouldInsertAfter) {
+                            budgetList.insertBefore(draggedBudgetItem, listItem.nextSibling);
+                        } else {
+                            budgetList.insertBefore(draggedBudgetItem, listItem);
+                        }
+
+                        saveDashboardState();
+                    });
+
+                    listItem.appendChild(labelWrap);
+                    listItem.appendChild(inputGroup);
+                    attachCurrencyBehavior(input);
+
+                    return listItem;
+                }
+
+                getCurrencyInputs().forEach(function (input) {
+                    attachCurrencyBehavior(input);
+                });
+
+                addBudgetForm.addEventListener("submit", function (event) {
+                    event.preventDefault();
+
+                    var budgetName = newBudgetNameInput.value.trim();
+
+                    if (!budgetName) {
+                        return;
+                    }
+
+                    budgetList.appendChild(createBudgetItem(budgetName, true));
+                    newBudgetNameInput.value = "";
+                    newBudgetNameInput.focus();
+                    if (budgetSortSelect.value !== "custom") {
+                        sortBudgetList();
+                    }
+                    saveDashboardState();
+                });
+
+                budgetSortSelect.addEventListener("change", function () {
+                    sortBudgetList();
+                    budgetSortMenu.hidden = true;
+                });
+
+                budgetSortButton.addEventListener("click", function (event) {
+                    event.stopPropagation();
+                    budgetSortMenu.hidden = !budgetSortMenu.hidden;
+                });
+
+                document.addEventListener("click", function (event) {
+                    if (!budgetSortButton.contains(event.target) && !budgetSortMenu.contains(event.target)) {
+                        budgetSortMenu.hidden = true;
+                    }
+                });
+
+                loadDashboardState();
+                sortBudgetList();
+                syncStartingEarnings();
+                updateNetWorth();
+
+                window.addEventListener("storage", function (event) {
+                    if (event.key === incomeCalculatorNetTotalKey || event.key === incomeCalculatorStorageKey) {
+                        syncStartingEarnings();
+                        updateNetWorth();
+                    } else if (event.key === dashboardStorageKey) {
+                        window.location.reload();
+                    }
+                });
+
+                window.addEventListener("focus", function () {
+                    syncStartingEarnings();
+                    updateNetWorth();
+                });
+            });
+        </script>
+    </head>
+    <body id="top">
+        <h1>Nguyens Budget Dashboard</h1>
+        <h3>Track your budget categories and watch your total update live.</h3>
+
+    <div class="page-button-wrap">
+        <a class="page-button" href="incomecalculator.html">Income Calculator</a>
+    </div>
+
+    <div class="dashboard-cards">
+        <section class="net-worth-card">
+            <p class="net-worth-title">Estimated Monthly Earnings</p>
+            <div class="net-worth-row">
+                <p class="net-worth-label">Total Net Income</p>
+                <p class="net-worth-amount" id="net-worth-amount">$0.00</p>
+            </div>
+        </section>
+    </div>
+
+    <section class="budget-card">
+        <div class="budget-card-header">
+            <h4>Budget Items</h4>
+            <div class="budget-sort-menu-wrap">
+                <button type="button" class="budget-sort-button" id="budget-sort-button" aria-label="Sort budget items">...</button>
+                <div class="budget-sort-menu" id="budget-sort-menu" hidden>
+                    <div class="budget-sort-controls">
+                        <select id="budget-sort-select">
+                            <option value="custom">Custom Sort</option>
+                            <option value="high-to-low">Highest to Lowest</option>
+                            <option value="low-to-high">Lowest to Highest</option>
+                        </select>
+                    </div>
+                    <p class="budget-sort-note" id="budget-sort-note">Custom sort is on. Drag budget rows into the order you want.</p>
+                </div>
+            </div>
+        </div>
+
+        <ol class="budget-list" id="budget-list"></ol>
+
+        <form id="add-budget-form">
+            <div class="add-budget-controls">
+                <input type="text" id="new-budget-name" placeholder="Type a custom budget name">
+                <button type="submit" class="add-budget-button">Add</button>
+            </div>
+        </form>
+    </section>
+
+    </body>
+</html>

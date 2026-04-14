@@ -1,0 +1,1150 @@
+<html>
+    <head>
+        <title>Income Calculator</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 2rem;
+                font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+                background: radial-gradient(circle at top, #24344f 0%, #111827 45%, #090d16 100%);
+                color: #f3f6fb;
+            }
+
+            .page-content {
+                max-width: none;
+            }
+
+            .header-row {
+                display: flex;
+                align-items: center;
+                gap: 0.9rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .back-button {
+                width: 2.8rem;
+                height: 2.8rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 999px;
+                border: 1px solid rgba(142, 197, 255, 0.35);
+                background: rgba(255, 255, 255, 0.06);
+                color: #8ec5ff;
+                font-size: 1.3rem;
+                font-weight: 700;
+                text-decoration: none;
+                box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+            }
+
+            .back-button:hover {
+                color: #ffffff;
+                border-color: rgba(197, 226, 255, 0.6);
+                background: rgba(142, 197, 255, 0.14);
+            }
+
+            h1 {
+                margin: 0;
+                text-align: left;
+            }
+
+            p {
+                color: #c8d5e8;
+                text-align: left;
+            }
+
+            .button-row {
+                display: flex;
+                gap: 0.85rem;
+                margin: 1.5rem 0 1rem;
+            }
+
+            .page-button {
+                border: 0;
+                display: inline-block;
+                padding: 0.85rem 1.4rem;
+                border-radius: 999px;
+                border: 1px solid rgba(142, 197, 255, 0.35);
+                background: linear-gradient(135deg, rgba(142, 197, 255, 0.18), rgba(89, 145, 255, 0.3));
+                box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+                color: #8ec5ff;
+                font-weight: 700;
+                font: inherit;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            .page-button:hover {
+                color: #ffffff;
+                border-color: rgba(197, 226, 255, 0.6);
+                box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
+            }
+
+            .page-button.is-danger {
+                color: #fecaca;
+                border-color: rgba(248, 113, 113, 0.35);
+                background: linear-gradient(135deg, rgba(127, 29, 29, 0.18), rgba(153, 27, 27, 0.28));
+            }
+
+            .page-button.is-danger:hover {
+                color: #ffffff;
+                border-color: rgba(252, 165, 165, 0.55);
+            }
+
+            .jobs-list {
+                display: grid;
+                gap: 1rem;
+                margin-top: 1.5rem;
+                justify-items: start;
+            }
+
+            .job-card {
+                min-width: 860px;
+                min-height: 250px;
+                width: fit-content;
+                padding: 1.2rem;
+                border-radius: 22px;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+                overflow: auto;
+                resize: horizontal;
+            }
+
+            .job-card-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .job-card h2 {
+                margin: 0 0 1rem;
+                font-size: 1.15rem;
+                color: #ffffff;
+            }
+
+            .job-title-input {
+                width: calc(100% - 3.6rem);
+                margin-bottom: 1rem;
+                padding: 0.2rem 0;
+                border: 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+                background: transparent;
+                color: #ffffff;
+                font: inherit;
+                font-size: 1.15rem;
+                font-weight: 700;
+                box-sizing: border-box;
+                min-width: 220px;
+                max-width: 100%;
+                resize: none;
+                overflow-wrap: anywhere;
+                white-space: pre-wrap;
+            }
+
+            .job-delete-button {
+                flex: 0 0 auto;
+                width: 2.6rem;
+                height: 2.6rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.04);
+                color: #fda4af;
+                font-size: 1.1rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+            }
+
+            .job-delete-button:hover {
+                background: rgba(127, 29, 29, 0.22);
+                border-color: rgba(248, 113, 113, 0.3);
+                color: #fecdd3;
+            }
+
+            .job-title-input::placeholder {
+                color: #dce8f8;
+            }
+
+            .job-title-input:focus {
+                outline: none;
+                border-bottom-color: rgba(142, 197, 255, 0.55);
+            }
+
+            .job-field {
+                display: grid;
+                grid-template-columns: minmax(150px, 180px) minmax(220px, 1fr);
+                align-items: center;
+                gap: 0;
+                margin-bottom: 0;
+                padding: 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(255, 255, 255, 0.03);
+            }
+
+            .job-field:last-child {
+                border-bottom: 0;
+            }
+
+            .job-field label {
+                color: #dce8f8;
+                font-weight: 600;
+                padding: 0.95rem 1rem;
+                border-right: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            .job-field input {
+                width: 100%;
+                min-width: 220px;
+                padding: 0.95rem 1rem;
+                border: 0;
+                border-radius: 0;
+                background: transparent;
+                color: #f3f6fb;
+                font: inherit;
+                box-sizing: border-box;
+            }
+
+            .job-field input[type="number"]::-webkit-outer-spin-button,
+            .job-field input[type="number"]::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            .job-field input[type="number"] {
+                appearance: textfield;
+                -moz-appearance: textfield;
+            }
+
+            @media (max-width: 560px) {
+                .job-field {
+                    grid-template-columns: 1fr;
+                }
+
+                .job-field label {
+                    border-right: 0;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                }
+            }
+
+            .job-field input::placeholder {
+                color: #9ab0cb;
+            }
+
+            .job-field input:focus {
+                outline: none;
+                background: rgba(142, 197, 255, 0.08);
+            }
+
+            .job-value-display {
+                padding: 0.95rem 1rem;
+                color: #ffffff;
+                font-weight: 700;
+                box-sizing: border-box;
+            }
+
+            .grand-totals-card {
+                min-width: 860px;
+                width: fit-content;
+                margin-top: 1.5rem;
+                padding: 1.2rem;
+                border-radius: 22px;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+            }
+
+            .grand-totals-title {
+                margin: 0 0 0.75rem;
+                color: #ffffff;
+                font-size: 1.05rem;
+            }
+
+            .section-break {
+                margin: 1.15rem 0 0.55rem;
+                color: #dce8f8;
+                font-size: 0.92rem;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+
+            .deduction-list {
+                border-radius: 18px;
+                overflow: hidden;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(255, 255, 255, 0.03);
+            }
+
+            .deduction-header-row {
+                display: grid;
+                grid-template-columns: minmax(280px, 1.8fr) minmax(180px, 1fr) minmax(190px, 1fr) 64px;
+                background: rgba(142, 197, 255, 0.08);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            .deduction-header-row div {
+                padding: 0.75rem 0.95rem;
+                border-right: 1px solid rgba(255, 255, 255, 0.08);
+                color: #dce8f8;
+                font-size: 0.85rem;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+
+            .deduction-header-row div:last-child {
+                border-right: 0;
+            }
+
+            .deduction-row {
+                display: grid;
+                grid-template-columns: minmax(280px, 1.8fr) minmax(180px, 1fr) minmax(190px, 1fr) 64px;
+                align-items: center;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            .deduction-row:last-child {
+                border-bottom: 0;
+            }
+
+            .deduction-row > * {
+                min-width: 0;
+                padding: 0.9rem 0.95rem;
+                border-right: 1px solid rgba(255, 255, 255, 0.08);
+                box-sizing: border-box;
+            }
+
+            .deduction-row > *:last-child {
+                border-right: 0;
+            }
+
+            .deduction-row input,
+            .deduction-row textarea,
+            .deduction-add-row button {
+                width: 100%;
+                min-width: 0;
+                border: 0;
+                background: transparent;
+                color: #f3f6fb;
+                font: inherit;
+            }
+
+            .deduction-row input::placeholder,
+            .deduction-row textarea::placeholder {
+                color: #9ab0cb;
+            }
+
+            .deduction-row input:focus,
+            .deduction-row textarea:focus,
+            .custom-select-button:focus {
+                outline: none;
+                background: rgba(142, 197, 255, 0.08);
+            }
+
+            .deduction-row textarea {
+                min-height: 3.2rem;
+                min-width: 240px;
+                padding: 0.9rem 0.95rem;
+                resize: none;
+                overflow-wrap: anywhere;
+                white-space: pre-wrap;
+            }
+
+            .deduction-action-wrap {
+                position: relative;
+                display: flex;
+                justify-content: center;
+            }
+
+            .deduction-action-button {
+                min-width: 2.4rem;
+                padding: 0.45rem 0.55rem;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.03);
+                color: #a9b9d6;
+                font-size: 0.88rem;
+                letter-spacing: 0.12em;
+                cursor: pointer;
+            }
+
+            .deduction-action-button:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.14);
+                color: #dce8f8;
+            }
+
+            .deduction-action-menu {
+                position: absolute;
+                top: calc(100% + 0.45rem);
+                right: 0;
+                min-width: 110px;
+                padding: 0.35rem;
+                border-radius: 12px;
+                background: rgba(10, 16, 28, 0.96);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+                z-index: 15;
+            }
+
+            .deduction-action-menu[hidden] {
+                display: none;
+            }
+
+            .deduction-action-item {
+                width: 100%;
+                padding: 0.65rem 0.8rem;
+                border: 0;
+                border-radius: 9px;
+                background: transparent;
+                color: #f3f6fb;
+                font: inherit;
+                text-align: left;
+                cursor: pointer;
+            }
+
+            .deduction-action-item:hover {
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+            .custom-select {
+                position: relative;
+                min-width: 160px;
+            }
+
+            .custom-select-button {
+                width: 100%;
+                min-width: 160px;
+                display: block;
+                padding: 0.9rem 3rem 0.9rem 0.95rem;
+                border: 0;
+                background: transparent;
+                color: #f3f6fb;
+                font: inherit;
+                text-align: left;
+                cursor: pointer;
+                position: relative;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                box-sizing: border-box;
+            }
+
+            .custom-select-button::after {
+                content: "";
+                position: absolute;
+                right: 1.05rem;
+                top: 50%;
+                width: 0.45rem;
+                height: 0.45rem;
+                border-right: 2px solid #8ec5ff;
+                border-bottom: 2px solid #8ec5ff;
+                transform: translateY(-70%) rotate(45deg);
+                pointer-events: none;
+            }
+
+            .custom-select-menu {
+                position: fixed;
+                margin: 0;
+                padding: 0.35rem;
+                list-style: none;
+                border-radius: 14px;
+                background: rgba(10, 16, 28, 0.98);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+                z-index: 20;
+            }
+
+            .custom-select-menu[hidden] {
+                display: none;
+            }
+
+            .custom-select-option {
+                width: 100%;
+                padding: 0.7rem 0.8rem;
+                border: 0;
+                border-radius: 10px;
+                background: transparent;
+                color: #f3f6fb;
+                font: inherit;
+                text-align: left;
+                cursor: pointer;
+            }
+
+            .custom-select-option:hover,
+            .custom-select-option.is-selected {
+                background: rgba(142, 197, 255, 0.12);
+            }
+
+            .deduction-add-row {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+
+            .deduction-add-button {
+                padding: 0.9rem 0.95rem;
+                text-align: left;
+                cursor: pointer;
+                min-width: 240px;
+            }
+
+            .deduction-add-button:hover {
+                background: rgba(142, 197, 255, 0.08);
+            }
+
+            .deduction-add-symbol {
+                display: inline-flex;
+                width: 1.5rem;
+                margin-right: 0.35rem;
+                justify-content: center;
+                font-size: 1.1rem;
+                font-weight: 700;
+            }
+
+            a {
+                color: #8ec5ff;
+                font-weight: 700;
+            }
+
+            @media (max-width: 720px) {
+                .deduction-header-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .deduction-header-row div {
+                    border-right: 0;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                }
+
+                .deduction-header-row div:last-child {
+                    border-bottom: 0;
+                }
+
+                .deduction-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .deduction-row > * {
+                    border-right: 0;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                }
+
+                .deduction-row > *:last-child {
+                    border-bottom: 0;
+                }
+            }
+        </style>
+        <script>
+            var incomeCalculatorStorageKey = "income-calculator-state";
+            var incomeCalculatorNetTotalKey = "income-calculator-grand-net";
+
+            function sanitizeCurrencyInput(value) {
+                var cleaned = value.replace(/[^0-9.]/g, "");
+                var parts = cleaned.split(".");
+
+                if (parts.length === 1) {
+                    return parts[0];
+                }
+
+                return parts[0] + "." + parts.slice(1).join("");
+            }
+
+            function parseCurrencyValue(value) {
+                var cleaned = sanitizeCurrencyInput(value);
+                var amount = Number.parseFloat(cleaned);
+
+                if (Number.isNaN(amount)) {
+                    return 0;
+                }
+
+                return amount;
+            }
+
+            function formatCurrencyValue(value) {
+                var amount = parseCurrencyValue(value);
+
+                if (!amount) {
+                    return "";
+                }
+
+                return amount.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD"
+                });
+            }
+
+            function formatMoney(amount) {
+                return amount.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD"
+                });
+            }
+
+            function parseIntegerValue(value) {
+                var digits = value.replace(/\D/g, "");
+
+                if (!digits) {
+                    return 0;
+                }
+
+                return Number.parseInt(digits, 10);
+            }
+
+            function formatPercentageValue(value) {
+                var cleaned = value.replace(/[^0-9.]/g, "");
+                var amount = Number.parseFloat(cleaned);
+
+                if (Number.isNaN(amount)) {
+                    return "";
+                }
+
+                return amount + "%";
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                var addJobButton = document.getElementById("add-job-button");
+                var saveJobsButton = document.getElementById("save-jobs-button");
+                var resetJobsButton = document.getElementById("reset-jobs-button");
+                var jobsList = document.getElementById("jobs-list");
+                var grandGrossValue = document.getElementById("grand-gross-value");
+                var grandNetValue = document.getElementById("grand-net-value");
+                var jobCount = 0;
+
+                function saveState() {
+                    var cards = jobsList.querySelectorAll(".job-card");
+                    var state = [];
+
+                    cards.forEach(function (card) {
+                        var deductions = [];
+
+                        card.querySelectorAll(".deduction-row").forEach(function (row) {
+                            deductions.push({
+                                title: row.querySelector("textarea").value,
+                                type: row.querySelector('input[type="hidden"][name*="-deduction-type-"]').value,
+                                value: row.querySelector('input[name*="-deduction-value-"]').value,
+                                rows: row.querySelector("textarea").rows
+                            });
+                        });
+
+                        state.push({
+                            title: card.querySelector(".job-title-input").value,
+                            titleRows: card.querySelector(".job-title-input").rows,
+                            hours: card.querySelector('input[name^="job-hours-"]').value,
+                            payRate: card.querySelector('input[name^="job-pay-rate-"]').value,
+                            width: card.style.width || "",
+                            deductions: deductions
+                        });
+                    });
+
+                    localStorage.setItem(incomeCalculatorStorageKey, JSON.stringify(state));
+                }
+
+                function updateGrandTotals() {
+                    var totalGross = 0;
+                    var totalNet = 0;
+                    var cards = jobsList.querySelectorAll(".job-card");
+
+                    cards.forEach(function (card) {
+                        totalGross += Number(card.dataset.grossPay || 0);
+                        totalNet += Number(card.dataset.netPay || 0);
+                    });
+
+                    grandGrossValue.textContent = formatMoney(totalGross);
+                    grandNetValue.textContent = formatMoney(totalNet);
+                    localStorage.setItem(incomeCalculatorNetTotalKey, String(totalNet));
+                }
+
+                function attachPayRateBehavior(input) {
+                    input.addEventListener("focus", function () {
+                        var currentValue = parseCurrencyValue(input.value);
+
+                        if (currentValue) {
+                            input.value = currentValue.toFixed(2).replace(/\.00$/, "");
+                        }
+                    });
+
+                    input.addEventListener("blur", function () {
+                        input.value = formatCurrencyValue(input.value);
+                    });
+                }
+
+                function calculateAdjustmentAmount(type, value, grossPay) {
+                    if (type === "currency") {
+                        return parseCurrencyValue(value);
+                    }
+
+                    if (type === "percentage") {
+                        var percent = Number.parseFloat(value.replace(/[^0-9.]/g, ""));
+                        return Number.isNaN(percent) ? 0 : grossPay * (percent / 100);
+                    }
+
+                    return parseIntegerValue(value);
+                }
+
+                function createCustomSelect(options, name, initialValue) {
+                    var wrapper = document.createElement("div");
+                    var hiddenInput = document.createElement("input");
+                    var button = document.createElement("button");
+                    var menu = document.createElement("ul");
+                    var listeners = [];
+                    var selectedValue = initialValue;
+
+                    wrapper.className = "custom-select";
+                    hiddenInput.type = "hidden";
+                    hiddenInput.name = name;
+                    button.type = "button";
+                    button.className = "custom-select-button";
+                    menu.className = "custom-select-menu";
+                    menu.hidden = true;
+
+                    function notifyChange() {
+                        listeners.forEach(function (listener) {
+                            listener();
+                        });
+                    }
+
+                    function positionMenu() {
+                        var buttonRect = button.getBoundingClientRect();
+
+                        menu.style.top = buttonRect.bottom + 6 + "px";
+                        menu.style.left = buttonRect.left + "px";
+                        menu.style.width = buttonRect.width + "px";
+                    }
+
+                    function setValue(nextValue, shouldNotify) {
+                        selectedValue = nextValue;
+                        hiddenInput.value = nextValue;
+
+                        options.forEach(function (option) {
+                            option.element.classList.toggle("is-selected", option.value === nextValue);
+                            if (option.value === nextValue) {
+                                button.textContent = option.label;
+                            }
+                        });
+
+                        if (shouldNotify) {
+                            notifyChange();
+                        }
+                    }
+
+                    options.forEach(function (optionData) {
+                        var item = document.createElement("li");
+                        var optionButton = document.createElement("button");
+                        var option = {
+                            value: optionData.value,
+                            label: optionData.label,
+                            element: optionButton
+                        };
+
+                        optionButton.type = "button";
+                        optionButton.className = "custom-select-option";
+                        optionButton.textContent = optionData.label;
+                        optionButton.addEventListener("click", function () {
+                            setValue(optionData.value, true);
+                            menu.hidden = true;
+                        });
+
+                        item.appendChild(optionButton);
+                        menu.appendChild(item);
+                        optionData.element = optionButton;
+                    });
+
+                    button.addEventListener("click", function (event) {
+                        event.stopPropagation();
+                        positionMenu();
+                        menu.hidden = !menu.hidden;
+                    });
+
+                    document.addEventListener("click", function (event) {
+                        if (!wrapper.contains(event.target)) {
+                            menu.hidden = true;
+                        }
+                    });
+
+                    window.addEventListener("resize", function () {
+                        if (!menu.hidden) {
+                            positionMenu();
+                        }
+                    });
+
+                    window.addEventListener("scroll", function () {
+                        if (!menu.hidden) {
+                            positionMenu();
+                        }
+                    }, true);
+
+                    wrapper.appendChild(hiddenInput);
+                    wrapper.appendChild(button);
+                    wrapper.appendChild(menu);
+
+                    setValue(initialValue, false);
+
+                    return {
+                        element: wrapper,
+                        get value() {
+                            return selectedValue;
+                        },
+                        setValue: function (nextValue) {
+                            setValue(nextValue, true);
+                        },
+                        addEventListener: function (eventName, listener) {
+                            if (eventName === "change") {
+                                listeners.push(listener);
+                            }
+                        }
+                    };
+                }
+
+                function attachValueBehavior(input, typeSelect) {
+                    function formatForType() {
+                        if (typeSelect.value === "currency") {
+                            input.value = formatCurrencyValue(input.value);
+                        } else if (typeSelect.value === "percentage") {
+                            input.value = formatPercentageValue(input.value);
+                        } else {
+                            var integerValue = parseIntegerValue(input.value);
+                            input.value = integerValue ? String(integerValue) : "";
+                        }
+                    }
+
+                    input.addEventListener("focus", function () {
+                        if (typeSelect.value === "currency") {
+                            var currencyValue = parseCurrencyValue(input.value);
+                            input.value = currencyValue ? currencyValue.toFixed(2).replace(/\.00$/, "") : "";
+                        } else if (typeSelect.value === "percentage") {
+                            input.value = input.value.replace(/[^0-9.]/g, "");
+                        } else {
+                            input.value = parseIntegerValue(input.value) || "";
+                        }
+                    });
+
+                    input.addEventListener("blur", formatForType);
+                    typeSelect.addEventListener("change", formatForType);
+                }
+
+                function createDeductionRow(jobIndex, rowIndex, onChange, initialData) {
+                    var row = document.createElement("div");
+                    var titleInput = document.createElement("textarea");
+                    var typeSelect = createCustomSelect([
+                        { value: "currency", label: "Currency" },
+                        { value: "percentage", label: "Percentage" },
+                        { value: "integer", label: "Integer" }
+                    ], "job-" + jobIndex + "-deduction-type-" + rowIndex, initialData && initialData.type ? initialData.type : "currency");
+                    var valueInput = document.createElement("input");
+                    var actionWrap = document.createElement("div");
+                    var actionButton = document.createElement("button");
+                    var actionMenu = document.createElement("div");
+                    var removeItem = document.createElement("button");
+
+                    row.className = "deduction-row";
+
+                    titleInput.name = "job-" + jobIndex + "-deduction-name-" + rowIndex;
+                    titleInput.placeholder = "Line title";
+                    titleInput.value = initialData && initialData.title ? initialData.title : "New Line";
+                    titleInput.rows = initialData && initialData.rows ? initialData.rows : 2;
+
+                    valueInput.type = "text";
+                    valueInput.name = "job-" + jobIndex + "-deduction-value-" + rowIndex;
+                    valueInput.placeholder = "$0.00";
+                    valueInput.inputMode = "decimal";
+                    valueInput.value = initialData && initialData.value ? initialData.value : "";
+
+                    actionWrap.className = "deduction-action-wrap";
+                    actionButton.type = "button";
+                    actionButton.className = "deduction-action-button";
+                    actionButton.setAttribute("aria-label", "More options");
+                    actionButton.title = "More options";
+                    actionButton.textContent = "...";
+
+                    actionMenu.className = "deduction-action-menu";
+                    actionMenu.hidden = true;
+
+                    removeItem.type = "button";
+                    removeItem.className = "deduction-action-item";
+                    removeItem.textContent = "Remove";
+
+                    typeSelect.addEventListener("change", function () {
+                        if (typeSelect.value === "currency") {
+                            valueInput.placeholder = "$0.00";
+                            valueInput.inputMode = "decimal";
+                        } else if (typeSelect.value === "percentage") {
+                            valueInput.placeholder = "0%";
+                            valueInput.inputMode = "decimal";
+                        } else {
+                            valueInput.placeholder = "0";
+                            valueInput.inputMode = "numeric";
+                        }
+
+                        onChange();
+                    });
+
+                    attachValueBehavior(valueInput, typeSelect);
+
+                    titleInput.addEventListener("input", onChange);
+                    valueInput.addEventListener("input", onChange);
+                    valueInput.addEventListener("blur", onChange);
+
+                    row.appendChild(titleInput);
+                    row.appendChild(typeSelect.element);
+                    row.appendChild(valueInput);
+                    actionWrap.appendChild(actionButton);
+                    actionWrap.appendChild(actionMenu);
+                    actionMenu.appendChild(removeItem);
+                    row.appendChild(actionWrap);
+
+                    row.getAdjustment = function (grossPay) {
+                        return -calculateAdjustmentAmount(typeSelect.value, valueInput.value, grossPay);
+                    };
+
+                    actionButton.addEventListener("click", function (event) {
+                        event.stopPropagation();
+                        actionMenu.hidden = !actionMenu.hidden;
+                    });
+
+                    removeItem.addEventListener("click", function () {
+                        row.remove();
+                        onChange();
+                    });
+
+                    document.addEventListener("click", function (event) {
+                        if (!actionWrap.contains(event.target)) {
+                            actionMenu.hidden = true;
+                        }
+                    });
+
+                    return row;
+                }
+
+                function createJobCard(initialData) {
+                    jobCount += 1;
+
+                    var card = document.createElement("section");
+                    var cardHeader = document.createElement("div");
+                    var titleInput = document.createElement("textarea");
+                    var deleteButton = document.createElement("button");
+                    var hoursField = document.createElement("div");
+                    var hoursLabel = document.createElement("label");
+                    var hoursInput = document.createElement("input");
+                    var payField = document.createElement("div");
+                    var payLabel = document.createElement("label");
+                    var payInput = document.createElement("input");
+                    var deductionHeading = document.createElement("p");
+                    var deductionList = document.createElement("div");
+                    var deductionHeaderRow = document.createElement("div");
+                    var addRow = document.createElement("div");
+                    var addRowButton = document.createElement("button");
+                    var totalsHeading = document.createElement("p");
+                    var grossField = document.createElement("div");
+                    var grossLabel = document.createElement("label");
+                    var grossValue = document.createElement("div");
+                    var netField = document.createElement("div");
+                    var netLabel = document.createElement("label");
+                    var netValue = document.createElement("div");
+                    var deductionCount = 0;
+
+                    card.className = "job-card";
+                    cardHeader.className = "job-card-header";
+
+                    titleInput.className = "job-title-input";
+                    titleInput.value = initialData && initialData.title ? initialData.title : "Job " + jobCount;
+                    titleInput.rows = initialData && initialData.titleRows ? initialData.titleRows : 2;
+                    titleInput.setAttribute("aria-label", "Job name");
+
+                    deleteButton.type = "button";
+                    deleteButton.className = "job-delete-button";
+                    deleteButton.setAttribute("aria-label", "Delete job");
+                    deleteButton.title = "Delete job";
+                    deleteButton.textContent = "X";
+
+                    hoursField.className = "job-field";
+                    hoursLabel.setAttribute("for", "job-hours-" + jobCount);
+                    hoursLabel.textContent = "Hours";
+                    hoursInput.type = "number";
+                    hoursInput.id = "job-hours-" + jobCount;
+                    hoursInput.name = "job-hours-" + jobCount;
+                    hoursInput.placeholder = "0";
+                    hoursInput.min = "0";
+                    hoursInput.step = "0.01";
+                    hoursInput.value = initialData && initialData.hours ? initialData.hours : "";
+
+                    payField.className = "job-field";
+                    payLabel.setAttribute("for", "job-pay-rate-" + jobCount);
+                    payLabel.textContent = "Pay Rate";
+                    payInput.type = "text";
+                    payInput.id = "job-pay-rate-" + jobCount;
+                    payInput.name = "job-pay-rate-" + jobCount;
+                    payInput.className = "currency-input";
+                    payInput.inputMode = "decimal";
+                    payInput.placeholder = "$0.00";
+                    payInput.value = initialData && initialData.payRate ? initialData.payRate : "";
+
+                    deductionHeading.className = "section-break";
+                    deductionHeading.textContent = "Deductions";
+
+                    deductionList.className = "deduction-list";
+                    deductionHeaderRow.className = "deduction-header-row";
+                    deductionHeaderRow.innerHTML = "<div>Line Title</div><div>Number Type</div><div>Amount</div><div></div>";
+
+                    addRow.className = "deduction-add-row";
+                    addRowButton.type = "button";
+                    addRowButton.className = "deduction-add-button";
+                    addRowButton.innerHTML = "<span class=\"deduction-add-symbol\">+</span>Add line";
+
+                    totalsHeading.className = "section-break";
+                    totalsHeading.textContent = "Totals";
+
+                    grossField.className = "job-field";
+                    grossLabel.textContent = "Gross Pay";
+                    grossValue.className = "job-value-display";
+                    grossValue.textContent = "$0.00";
+
+                    netField.className = "job-field";
+                    netLabel.textContent = "Net Pay";
+                    netValue.className = "job-value-display";
+                    netValue.textContent = "$0.00";
+
+                    function updateTotals() {
+                        var grossPay = (Number.parseFloat(hoursInput.value) || 0) * parseCurrencyValue(payInput.value);
+                        var netPay = grossPay;
+                        var rows = deductionList.querySelectorAll(".deduction-row");
+
+                        rows.forEach(function (row) {
+                            if (typeof row.getAdjustment === "function") {
+                                netPay += row.getAdjustment(grossPay);
+                            }
+                        });
+
+                        grossValue.textContent = formatMoney(grossPay);
+                        netValue.textContent = formatMoney(netPay);
+                        card.dataset.grossPay = String(grossPay);
+                        card.dataset.netPay = String(netPay);
+                        updateGrandTotals();
+                    }
+
+                    hoursField.appendChild(hoursLabel);
+                    hoursField.appendChild(hoursInput);
+                    payField.appendChild(payLabel);
+                    payField.appendChild(payInput);
+                    deductionList.appendChild(deductionHeaderRow);
+                    grossField.appendChild(grossLabel);
+                    grossField.appendChild(grossValue);
+                    netField.appendChild(netLabel);
+                    netField.appendChild(netValue);
+                    addRow.appendChild(addRowButton);
+                    deductionList.appendChild(addRow);
+
+                    cardHeader.appendChild(titleInput);
+                    cardHeader.appendChild(deleteButton);
+                    card.appendChild(cardHeader);
+                    card.appendChild(hoursField);
+                    card.appendChild(payField);
+                    card.appendChild(deductionHeading);
+                    card.appendChild(deductionList);
+                    card.appendChild(totalsHeading);
+                    card.appendChild(grossField);
+                    card.appendChild(netField);
+
+                    attachPayRateBehavior(payInput);
+                    if (initialData && initialData.width) {
+                        card.style.width = initialData.width;
+                    }
+
+                    hoursInput.addEventListener("input", updateTotals);
+                    payInput.addEventListener("input", updateTotals);
+                    payInput.addEventListener("blur", updateTotals);
+                    titleInput.addEventListener("input", updateTotals);
+
+                    deleteButton.addEventListener("click", function () {
+                        card.remove();
+                        updateGrandTotals();
+                    });
+
+                    addRowButton.addEventListener("click", function () {
+                        deductionCount += 1;
+                        deductionList.insertBefore(createDeductionRow(jobCount, deductionCount, updateTotals), addRow);
+                        updateTotals();
+                    });
+
+                    if (initialData && Array.isArray(initialData.deductions)) {
+                        initialData.deductions.forEach(function (deduction) {
+                            deductionCount += 1;
+                            deductionList.insertBefore(createDeductionRow(jobCount, deductionCount, updateTotals, deduction), addRow);
+                        });
+                    }
+
+                    updateTotals();
+
+                    return card;
+                }
+
+                function loadState() {
+                    var savedState = localStorage.getItem(incomeCalculatorStorageKey);
+
+                    if (!savedState) {
+                        return;
+                    }
+
+                    try {
+                        JSON.parse(savedState).forEach(function (jobData) {
+                            jobsList.appendChild(createJobCard(jobData));
+                        });
+                    } catch (error) {
+                        localStorage.removeItem(incomeCalculatorStorageKey);
+                    }
+                }
+
+                addJobButton.addEventListener("click", function () {
+                    jobsList.appendChild(createJobCard());
+                    updateGrandTotals();
+                });
+
+                saveJobsButton.addEventListener("click", function () {
+                    saveState();
+                });
+
+                resetJobsButton.addEventListener("click", function () {
+                    jobsList.innerHTML = "";
+                    localStorage.removeItem(incomeCalculatorStorageKey);
+                    localStorage.removeItem(incomeCalculatorNetTotalKey);
+                    updateGrandTotals();
+                });
+
+                loadState();
+                updateGrandTotals();
+            });
+        </script>
+    </head>
+    <body>
+        <main class="page-content">
+            <div class="header-row">
+                <a class="back-button" href="budgetdashboard
+.html" aria-label="Back to home">&larr;</a>
+                <h1>Income Calculator</h1>
+            </div>
+            <p>Calculator your potential earnings here!</p>
+            <div class="button-row">
+                <button class="page-button" id="add-job-button" type="button">Add Job</button>
+                <button class="page-button" id="save-jobs-button" type="button">Save</button>
+                <button class="page-button is-danger" id="reset-jobs-button" type="button">Reset</button>
+            </div>
+            <div class="jobs-list" id="jobs-list"></div>
+            <section class="grand-totals-card">
+                <p class="grand-totals-title">Grand Totals</p>
+                <div class="job-field">
+                    <label>Gross Income</label>
+                    <div class="job-value-display" id="grand-gross-value">$0.00</div>
+                </div>
+                <div class="job-field">
+                    <label>Net Income</label>
+                    <div class="job-value-display" id="grand-net-value">$0.00</div>
+                </div>
+            </section>
+        </main>
+    </body>
+</html>
